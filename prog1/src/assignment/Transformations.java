@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 class Invert extends ImageEffect {
     public int[][] apply(int[][] pixels,
-                         ArrayList<ImageEffectParam> params) {
+            ArrayList<ImageEffectParam> params) {
         int width = pixels[0].length;
         int height = pixels.length;
 
@@ -34,9 +34,10 @@ class Invert extends ImageEffect {
     }
 }
 
+// Iterate through the pixels array and replace each pixel with a new pixel that does not contain a red value 
 class NoRed extends ImageEffect {
     public int[][] apply(int[][] pixels,
-                         ArrayList<ImageEffectParam> params) {
+            ArrayList<ImageEffectParam> params) {
         int width = pixels[0].length;
         int height = pixels.length;
 
@@ -49,9 +50,10 @@ class NoRed extends ImageEffect {
     }
 }
 
+// Iterate through the pixels array and replace each pixel with a new pixel that does not contain a green value 
 class NoGreen extends ImageEffect {
     public int[][] apply(int[][] pixels,
-                         ArrayList<ImageEffectParam> params) {
+            ArrayList<ImageEffectParam> params) {
         int width = pixels[0].length;
         int height = pixels.length;
 
@@ -64,9 +66,10 @@ class NoGreen extends ImageEffect {
     }
 }
 
+// Iterate through the pixels array and replace each pixel with a new pixel that does not contain a blue value 
 class NoBlue extends ImageEffect {
     public int[][] apply(int[][] pixels,
-                         ArrayList<ImageEffectParam> params) {
+            ArrayList<ImageEffectParam> params) {
         int width = pixels[0].length;
         int height = pixels.length;
 
@@ -78,6 +81,7 @@ class NoBlue extends ImageEffect {
         return pixels;
     }
 }
+
 
 class RedOnly extends ImageEffect {
     public int[][] apply(int[][] pixels,
@@ -111,7 +115,7 @@ class GreenOnly extends ImageEffect {
 
 class BlueOnly extends ImageEffect {
     public int[][] apply(int[][] pixels,
-                         ArrayList<ImageEffectParam> params) {
+            ArrayList<ImageEffectParam> params) {
         int width = pixels[0].length;
         int height = pixels.length;
 
@@ -124,9 +128,10 @@ class BlueOnly extends ImageEffect {
     }
 }
 
+// For each pixel, get the average of the 3 RBG values and create a new pixel with that average value for each shade.
 class BlackAndWhite extends ImageEffect {
     public int[][] apply(int[][] pixels,
-                         ArrayList<ImageEffectParam> params) {
+            ArrayList<ImageEffectParam> params) {
         int width = pixels[0].length;
         int height = pixels.length;
 
@@ -141,6 +146,8 @@ class BlackAndWhite extends ImageEffect {
     }
 }
 
+
+// Loop through half of each sub array (row) and swap the current pixel with the corrensponding pixel on the right side.  
 class VerticalReflect extends ImageEffect {
     public int[][] apply(int[][] pixels,
                          ArrayList<ImageEffectParam> params) {
@@ -149,10 +156,10 @@ class VerticalReflect extends ImageEffect {
 
         for (int x = 0; x < width / 2; x++) {
             for (int y = 0; y < height; y++) {
-                int temp = pixels[y][x];
-                int rightP = pixels[y][width-x -1];
-                pixels[y][x] = rightP;
-                pixels[y][width-x-1] = temp;
+                int temp = pixels[y][x]; // Set temp  to the current pixel on the left side
+                int rightP = pixels[y][width - x - 1]; // Get the right pixel by substracting (x index - 1) from the image width
+                pixels[y][x] = rightP; // Set the left pixel to the right pixel
+                pixels[y][width-x-1] = temp; // Set the right pixel to the old left pixel
             }
         }
         return pixels;
@@ -186,17 +193,13 @@ class Grow extends ImageEffect {
         for (int y = 0, newY = 0; y < height; y++, newY = newY + 2) {
             for (int x = 0, newX = 0; x < width; x++, newX = newX + 2) {
 
-                // System.out.println("width of new arr: " + newArr[0].length);
-                // System.out.println("hieght of new arr: " + newArr.length);
 
                 int currPixel = pixels[y][x];
 
-                // if (newY <= (height * 2) && newX <= (width * 2)) {
                 newArr[newY][newX] = currPixel;
                 newArr[newY + 1][newX] = currPixel;
                 newArr[newY][newX + 1] = currPixel;
                 newArr[newY + 1][newX + 1] = currPixel;
-                // }
 
             }
         }
@@ -207,24 +210,55 @@ class Grow extends ImageEffect {
 
 class Shrink extends ImageEffect {
     public int[][] apply(int[][] pixels,
-                         ArrayList<ImageEffectParam> params) {
+            ArrayList<ImageEffectParam> params) {
+                            
         int width = pixels[0].length;
         int height = pixels.length;
-        int[][] newArr = new int[height / 2][width / 2];
-        for (int x = 0, newX = 0; x < width; newX++, x = x + 2) {
-            for (int y = 0, newY =0; y < height; newY++, y = y + 2) {
-                int pixel1 = pixels[y][x];
-                int pixel2 = pixels[y + 1][x];
-                int pixel3 = pixels[y][x+1];
-                int pixel4 = pixels[y + 1][x + 1];
-                
-                int averageR = (getRed(pixel1) + getRed(pixel2) + getRed(pixel3) + getRed(pixel4)) / 4;
-                int averageG = (getGreen(pixel1) + getGreen(pixel2) + getGreen(pixel3) + getGreen(pixel4)) / 4;
-                int averageB = (getBlue(pixel1) + getBlue(pixel2) + getBlue(pixel3) + getBlue(pixel4)) / 4;
 
-                int newPixel = makePixel(averageR, averageG, averageB);
-        
-                newArr[newY][newX] = newPixel; 
+        int[][] newArr = new int[(int) Math.ceil(height / 2)][(int) Math.ceil(width / 2)];
+        for (int x = 0, newX = 0; x < width; newX++, x = x + 2) {
+            for (int y = 0, newY = 0; y < height; newY++, y = y + 2) {
+                int pixel1 = pixels[y][x];
+
+
+                // if image cannot be any smaller 
+                if (width <= 1 || height <= 1) {
+                    return pixels;
+                } else if (width <= 1) {
+                    int pixel2 = pixels[y + 1][x];
+                    int averageR = (getRed(pixel1) + getRed(pixel2)) / 2;
+                    int averageG = (getGreen(pixel1) + getGreen(pixel2)) / 2;
+                    int averageB = (getBlue(pixel1) + getBlue(pixel2)) / 2; 
+                    int newPixel = makePixel(averageR, averageG, averageB);
+                    newArr[newY][newX] = newPixel; 
+                } else if (height <= 1) {
+                    System.out.println("height" + height);
+                    System.out.println("width" + width);
+                    System.out.println("New Arr height" + newArr.length);
+                    System.out.println("New Arr Width" + newArr[0].length);
+
+
+
+                    int pixel2 = pixels[y][x+1];
+                    int averageR = (getRed(pixel1) + getRed(pixel2)) / 2;
+                    int averageG = (getGreen(pixel1) + getGreen(pixel2)) / 2;
+                    int averageB = (getBlue(pixel1) + getBlue(pixel2)) / 2; 
+                    int newPixel = makePixel(averageR, averageG, averageB);
+                    newArr[newY][newX] = newPixel; 
+                } else {
+                    int pixel2 = pixels[y + 1][x];
+                    int pixel3 = pixels[y][x+1];
+                    int pixel4 = pixels[y + 1][x + 1];
+                    
+                    int averageR = (getRed(pixel1) + getRed(pixel2) + getRed(pixel3) + getRed(pixel4)) / 4;
+                    int averageG = (getGreen(pixel1) + getGreen(pixel2) + getGreen(pixel3) + getGreen(pixel4)) / 4;
+                    int averageB = (getBlue(pixel1) + getBlue(pixel2) + getBlue(pixel3) + getBlue(pixel4)) / 4;
+    
+                    int newPixel = makePixel(averageR, averageG, averageB);
+                    newArr[newY][newX] = newPixel; 
+                }
+
+
             }
         }
         return newArr;
