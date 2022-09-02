@@ -147,10 +147,10 @@ class BlackAndWhite extends ImageEffect {
 }
 
 
-// Loop through half of each sub array (row) and swap the current pixel with the corrensponding pixel on the right side.  
+// Loop through half of the columns and swap the current pixel with the corrensponding pixel on the right side.  
 class VerticalReflect extends ImageEffect {
     public int[][] apply(int[][] pixels,
-                         ArrayList<ImageEffectParam> params) {
+            ArrayList<ImageEffectParam> params) {
         int width = pixels[0].length;
         int height = pixels.length;
 
@@ -159,40 +159,43 @@ class VerticalReflect extends ImageEffect {
                 int temp = pixels[y][x]; // Set temp  to the current pixel on the left side
                 int rightP = pixels[y][width - x - 1]; // Get the right pixel by substracting (x index - 1) from the image width
                 pixels[y][x] = rightP; // Set the left pixel to the right pixel
-                pixels[y][width-x-1] = temp; // Set the right pixel to the old left pixel
+                pixels[y][width - x - 1] = temp; // Set the right pixel to the old left pixel
             }
         }
         return pixels;
     }
 }
 
+// Loop through half of the rows and swap the current pixel with the corrensponding pixel on the right side.  
 class HorizontalReflect extends ImageEffect {
     public int[][] apply(int[][] pixels,
-                         ArrayList<ImageEffectParam> params) {
+            ArrayList<ImageEffectParam> params) {
         int width = pixels[0].length;
         int height = pixels.length;
 
         for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height /2; y++) {
+            for (int y = 0; y < height / 2; y++) {
                 int temp = pixels[y][x];
-                int rightP = pixels[height-y-1][x];
+                int rightP = pixels[height - y - 1][x];
                 pixels[y][x] = rightP;
-                pixels[height-y-1][x] = temp;
+                pixels[height - y - 1][x] = temp;
             }
         }
         return pixels;
     }
 }
 
+// grow() maps each pixel in the original array to 4 pixels in s new array.  
 class Grow extends ImageEffect {
     public int[][] apply(int[][] pixels,
             ArrayList<ImageEffectParam> params) {
         int width = pixels[0].length;
         int height = pixels.length;
-        int[][] newArr = new int[height * 2][width * 2];
+        // Initialize new a new array that is double the size of the original array
+        int[][] newArr = new int[height * 2][width * 2]; 
         for (int y = 0, newY = 0; y < height; y++, newY = newY + 2) {
             for (int x = 0, newX = 0; x < width; x++, newX = newX + 2) {
-
+                // here we are incrementing newX and newY by 2 instead of 1 so to not overwrite the previously copied pixel 
 
                 int currPixel = pixels[y][x];
 
@@ -211,41 +214,40 @@ class Grow extends ImageEffect {
 class Shrink extends ImageEffect {
     public int[][] apply(int[][] pixels,
             ArrayList<ImageEffectParam> params) {
+
                             
         int width = pixels[0].length;
         int height = pixels.length;
+        
+        int[][] newArr = new int[height / 2][width / 2];
 
-        int[][] newArr = new int[(int) Math.ceil(height / 2)][(int) Math.ceil(width / 2)];
         for (int x = 0, newX = 0; x < width; newX++, x = x + 2) {
             for (int y = 0, newY = 0; y < height; newY++, y = y + 2) {
                 int pixel1 = pixels[y][x];
-
-
                 // if image cannot be any smaller 
-                if (width <= 1 || height <= 1) {
+                if (width <= 1 && height <= 1) {
                     return pixels;
+                // if only 1 column 
                 } else if (width <= 1) {
+                    newArr = new int[height / 2][1];
                     int pixel2 = pixels[y + 1][x];
                     int averageR = (getRed(pixel1) + getRed(pixel2)) / 2;
                     int averageG = (getGreen(pixel1) + getGreen(pixel2)) / 2;
                     int averageB = (getBlue(pixel1) + getBlue(pixel2)) / 2; 
                     int newPixel = makePixel(averageR, averageG, averageB);
-                    newArr[newY][newX] = newPixel; 
+                    newArr[newY][0] = newPixel;
+                // if only 1 row 
                 } else if (height <= 1) {
-                    System.out.println("height" + height);
-                    System.out.println("width" + width);
-                    System.out.println("New Arr height" + newArr.length);
-                    System.out.println("New Arr Width" + newArr[0].length);
-
-
-
+                    newArr = new int[1][width / 2];
                     int pixel2 = pixels[y][x+1];
                     int averageR = (getRed(pixel1) + getRed(pixel2)) / 2;
                     int averageG = (getGreen(pixel1) + getGreen(pixel2)) / 2;
                     int averageB = (getBlue(pixel1) + getBlue(pixel2)) / 2; 
                     int newPixel = makePixel(averageR, averageG, averageB);
-                    newArr[newY][newX] = newPixel; 
+                    newArr[0][newX] = newPixel;
                 } else {
+                    newArr = new int[height / 2][width / 2];
+
                     int pixel2 = pixels[y + 1][x];
                     int pixel3 = pixels[y][x+1];
                     int pixel4 = pixels[y + 1][x + 1];
@@ -265,7 +267,7 @@ class Shrink extends ImageEffect {
     }
 }
 
-
+// Threshold iterates over each pixel and uses if statements to check whether the red, green, and or blue values of the pixel are above the threshold, sets the values to 0 if below and 255 if above, and sets the current pixel to a new pixel with the three new RBG values.
 class Threshold extends ImageEffect {
 
 
